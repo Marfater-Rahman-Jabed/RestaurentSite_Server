@@ -29,6 +29,8 @@ async function run() {
         const ItemCollection = client.db('HungryCafe').collection('ItemCollection')
         const PopularCollection = client.db('HungryCafe').collection('PopularItems')
         const BannerCollection = client.db('HungryCafe').collection('BannerCollection')
+        const UserCollection = client.db('HungryCafe').collection('UserCollection')
+
 
 
 
@@ -64,7 +66,18 @@ async function run() {
         })
 
 
+        app.get('/alluser/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email };
+            const user = await UserCollection.findOne(query);
+            res.send({ isAdmin: user?.role === 'admin' });
+        })
         //post method start here
+        app.post('/addUser', async (req, res) => {
+            const query = req.body;
+            const result = await UserCollection.insertOne(query);
+            res.send(result);
+        })
 
         app.post('/AddBanner', async (req, res) => {
             const data = req.body;
@@ -72,6 +85,7 @@ async function run() {
             res.send(data);
 
         })
+
 
 
         //Delete method start here
