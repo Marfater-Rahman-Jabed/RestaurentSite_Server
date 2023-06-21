@@ -30,6 +30,7 @@ async function run() {
         const PopularCollection = client.db('HungryCafe').collection('PopularItems')
         const BannerCollection = client.db('HungryCafe').collection('BannerCollection')
         const UserCollection = client.db('HungryCafe').collection('UserCollection')
+        const CartCollection = client.db('HungryCafe').collection('CartCollection')
 
 
 
@@ -72,6 +73,16 @@ async function run() {
             const user = await UserCollection.findOne(query);
             res.send({ isAdmin: user?.role === 'admin' });
         })
+
+        app.get('/myCart', async (req, res) => {
+            const email = req.query;
+            const query = { email: email.email };
+            const cursor = CartCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result)
+        })
+
+
         //post method start here
         app.post('/addUser', async (req, res) => {
             const query = req.body;
@@ -82,8 +93,13 @@ async function run() {
         app.post('/AddBanner', async (req, res) => {
             const data = req.body;
             const result = await BannerCollection.insertOne(data);
-            res.send(data);
+            res.send(result);
 
+        })
+        app.post('/addToCart', async (req, res) => {
+            const data = req.body;
+            const result = await CartCollection.insertOne(data);
+            res.send(result)
         })
 
 
@@ -96,6 +112,15 @@ async function run() {
                 _id: new ObjectId(id)
             }
             const result = BannerCollection.deleteOne(query)
+            res.send(result);
+        })
+
+        app.delete('/cart/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {
+                _id: new ObjectId(id)
+            };
+            const result = CartCollection.deleteOne(query);
             res.send(result);
         })
 
