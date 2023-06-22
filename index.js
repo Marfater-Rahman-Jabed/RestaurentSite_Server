@@ -66,6 +66,13 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/allUser/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email };
+            const result = await UserCollection.findOne(query);
+            // const result = await cursor.toArray();
+            res.send(result)
+        })
 
         app.get('/alluser/admin/:email', async (req, res) => {
             const email = req.params.email;
@@ -106,13 +113,23 @@ async function run() {
 
         app.put('/quantity/:id', async (req, res) => {
             const id = req.params.id;
+
             const filter = {
                 _id: new ObjectId(id)
             }
+            const findItem = await CartCollection.findOne(filter)
+            // console.log(findItem.quantity + 1)
+            const itemsPrice = ((findItem?.price - (findItem?.discount ? findItem?.discount / 100 : 0)));
+
             const updatedDoc = {
                 $inc: {
-                    quantity: 1
+                    quantity: 1,
+
+                },
+                $set: {
+                    totalPrice: (findItem?.price * (findItem?.quantity + 1)) - (findItem?.discount ? ((findItem?.price) * (findItem?.discount / 100) * (findItem?.quantity + 1)) : 0)
                 }
+
             };
             const result = await CartCollection.updateOne(filter, updatedDoc);
             res.send(result)
@@ -122,9 +139,16 @@ async function run() {
             const filter = {
                 _id: new ObjectId(id)
             }
+            const findItem = await CartCollection.findOne(filter)
+            // console.log(findItem.quantity + 1)
+            const itemsPrice = ((findItem?.price - (findItem?.discount ? findItem?.discount / 100 : 0)));
+
             const updatedDoc = {
                 $inc: {
                     quantity: -1
+                },
+                $set: {
+                    totalPrice: (findItem?.price * (findItem?.quantity - 1)) - (findItem?.discount ? ((findItem?.price) * (findItem?.discount / 100) * (findItem?.quantity - 1)) : 0)
                 }
             };
             const result = await CartCollection.updateOne(filter, updatedDoc);
