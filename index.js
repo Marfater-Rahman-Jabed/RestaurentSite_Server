@@ -102,7 +102,34 @@ async function run() {
             res.send(result)
         })
 
+        //PUT method start here
 
+        app.put('/quantity/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = {
+                _id: new ObjectId(id)
+            }
+            const updatedDoc = {
+                $inc: {
+                    quantity: 1
+                }
+            };
+            const result = await CartCollection.updateOne(filter, updatedDoc);
+            res.send(result)
+        })
+        app.put('/decrease/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = {
+                _id: new ObjectId(id)
+            }
+            const updatedDoc = {
+                $inc: {
+                    quantity: -1
+                }
+            };
+            const result = await CartCollection.updateOne(filter, updatedDoc);
+            res.send(result)
+        })
 
         //Delete method start here
 
