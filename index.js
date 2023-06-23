@@ -89,6 +89,19 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/cartCalculation', async (req, res) => {
+            const email = req.query;
+            const query = { email: email.email };
+            const cursor = CartCollection.find(query);
+            const result = await cursor.toArray();
+            // console.log(result)
+            const sum = result?.reduce((accumulator, object) => {
+                return accumulator + object.totalPrice;
+            }, 0)
+            // console.log(sum)
+            res.send({ sum })
+        })
+
 
         //post method start here
         app.post('/addUser', async (req, res) => {
@@ -107,6 +120,12 @@ async function run() {
             const data = req.body;
             const result = await CartCollection.insertOne(data);
             res.send(result)
+        })
+
+        app.post('/addPopular', async (req, res) => {
+            const data = req.body;
+            const result = await PopularCollection.insertOne(data);
+            res.send(result);
         })
 
         //PUT method start here
@@ -155,6 +174,8 @@ async function run() {
             res.send(result)
         })
 
+
+
         //Delete method start here
 
         app.delete('/banner/:id', async (req, res) => {
@@ -162,7 +183,7 @@ async function run() {
             const query = {
                 _id: new ObjectId(id)
             }
-            const result = BannerCollection.deleteOne(query)
+            const result = await BannerCollection.deleteOne(query)
             res.send(result);
         })
 
@@ -171,9 +192,27 @@ async function run() {
             const query = {
                 _id: new ObjectId(id)
             };
-            const result = CartCollection.deleteOne(query);
+            const result = await CartCollection.deleteOne(query);
             res.send(result);
         })
+
+        app.delete('/popularDelete/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {
+                _id: new ObjectId(id)
+            };
+            const result = await PopularCollection.deleteOne(query);
+            res.send(result)
+        })
+
+        // app.put('/items/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const query = {
+        //         "items._id": id
+        //     }
+        //     const result = await ItemCollection.items.updateOne(query, { $pop: { items: query } })
+        //     res.send(result)
+        // })
 
 
 
