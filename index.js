@@ -214,7 +214,24 @@ async function run() {
         //     res.send(result)
         // })
 
-
+        app.post('/itemsDisable/:id', async (req, res) => {
+            const id = req.params.id;
+            const result = await ItemCollection.updateOne({ "items._id": id }, {
+                $set: {
+                    "items.$.available": 0
+                }
+            });
+            res.send(result)
+        })
+        app.post('/itemsMakeAble/:id', async (req, res) => {
+            const id = req.params.id;
+            const result = await ItemCollection.updateOne({ "items._id": id }, {
+                $set: {
+                    "items.$.available": 1
+                }
+            });
+            res.send(result)
+        })
 
     }
 
