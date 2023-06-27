@@ -31,6 +31,7 @@ async function run() {
         const BannerCollection = client.db('HungryCafe').collection('BannerCollection')
         const UserCollection = client.db('HungryCafe').collection('UserCollection')
         const CartCollection = client.db('HungryCafe').collection('CartCollection')
+        const ReviewCollection = client.db('HungryCafe').collection('ReviewCollection')
 
 
 
@@ -102,8 +103,22 @@ async function run() {
             res.send({ sum })
         })
 
+        app.get('/allReview', async (req, res) => {
+            const query = {};
+            const cursor = ReviewCollection.find(query)
+            const result = await cursor.toArray();
+            res.send(result)
+        })
+        app.get('/allUser', async (req, res) => {
+            const query = {};
+            const cursor = UserCollection.find(query)
+            const result = await cursor.toArray();
+            res.send(result)
+        })
 
         //post method start here
+
+
         app.post('/addUser', async (req, res) => {
             const query = req.body;
             const result = await UserCollection.insertOne(query);
@@ -127,6 +142,32 @@ async function run() {
             const result = await PopularCollection.insertOne(data);
             res.send(result);
         })
+
+        app.post('/itemsDisable/:id', async (req, res) => {
+            const id = req.params.id;
+            const result = await ItemCollection.updateOne({ "items._id": id }, {
+                $set: {
+                    "items.$.available": 0
+                }
+            });
+            res.send(result)
+        })
+        app.post('/itemsMakeAble/:id', async (req, res) => {
+            const id = req.params.id;
+            const result = await ItemCollection.updateOne({ "items._id": id }, {
+                $set: {
+                    "items.$.available": 1
+                }
+            });
+            res.send(result)
+        })
+
+        app.post('/clientReview', async (req, res) => {
+            const body = req.body;
+            const result = await ReviewCollection.insertOne(body)
+            res.send(result)
+        })
+
 
         //PUT method start here
 
@@ -174,6 +215,19 @@ async function run() {
             res.send(result)
         })
 
+        app.put('/updateReviewDisplay/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = {
+                _id: new ObjectId(id)
+            };
+            const updatedDoc = {
+                $set: {
+                    display: 'ok'
+                }
+            };
+            const result = await ReviewCollection.updateOne(filter, updatedDoc)
+            res.send(result)
+        })
 
 
         //Delete method start here
@@ -199,9 +253,20 @@ async function run() {
         app.delete('/popularDelete/:id', async (req, res) => {
             const id = req.params.id;
             const query = {
-                _id: new ObjectId(id)
+                //objectid not use because database has not it
+                _id: (id)
             };
             const result = await PopularCollection.deleteOne(query);
+            res.send(result)
+        })
+
+        app.delete('/reviewDelete/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {
+                //objectid not use because database has not it
+                _id: new ObjectId(id)
+            };
+            const result = await ReviewCollection.deleteOne(query);
             res.send(result)
         })
 
@@ -214,24 +279,6 @@ async function run() {
         //     res.send(result)
         // })
 
-        app.post('/itemsDisable/:id', async (req, res) => {
-            const id = req.params.id;
-            const result = await ItemCollection.updateOne({ "items._id": id }, {
-                $set: {
-                    "items.$.available": 0
-                }
-            });
-            res.send(result)
-        })
-        app.post('/itemsMakeAble/:id', async (req, res) => {
-            const id = req.params.id;
-            const result = await ItemCollection.updateOne({ "items._id": id }, {
-                $set: {
-                    "items.$.available": 1
-                }
-            });
-            res.send(result)
-        })
 
     }
 
