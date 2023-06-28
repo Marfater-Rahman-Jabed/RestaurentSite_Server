@@ -32,6 +32,7 @@ async function run() {
         const UserCollection = client.db('HungryCafe').collection('UserCollection')
         const CartCollection = client.db('HungryCafe').collection('CartCollection')
         const ReviewCollection = client.db('HungryCafe').collection('ReviewCollection')
+        const OrderCollection = client.db('HungryCafe').collection('OrderCollection')
 
 
 
@@ -116,6 +117,13 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/allOrders', async (req, res) => {
+            const query = {};
+            const cursor = OrderCollection.find(query)
+            const result = await cursor.toArray();
+            res.send(result)
+        })
+
         //post method start here
 
 
@@ -165,6 +173,12 @@ async function run() {
         app.post('/clientReview', async (req, res) => {
             const body = req.body;
             const result = await ReviewCollection.insertOne(body)
+            res.send(result)
+        })
+
+        app.post('/createOrder', async (req, res) => {
+            const body = req.body;
+            const result = await OrderCollection.insertOne(body)
             res.send(result)
         })
 
