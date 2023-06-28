@@ -123,6 +123,14 @@ async function run() {
             const result = await cursor.toArray();
             res.send(result)
         })
+        app.get('/allOrder/unprocess', async (req, res) => {
+            const query = {
+                process: 'no'
+            }
+            const cursor = OrderCollection.find(query)
+            const result = await cursor.toArray();
+            res.send(result)
+        })
 
         //post method start here
 
@@ -243,6 +251,20 @@ async function run() {
             res.send(result)
         })
 
+        app.put('/updateProcessing/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = {
+                _id: new ObjectId(id)
+            };
+            const updatedDoc = {
+                $set: {
+                    process: 'yes'
+                }
+            }
+            const result = await OrderCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+
 
         //Delete method start here
 
@@ -281,6 +303,15 @@ async function run() {
                 _id: new ObjectId(id)
             };
             const result = await ReviewCollection.deleteOne(query);
+            res.send(result)
+        })
+        app.delete('/OrderDelete/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {
+                //objectid not use because database has not it
+                _id: new ObjectId(id)
+            };
+            const result = await OrderCollection.deleteOne(query);
             res.send(result)
         })
 
