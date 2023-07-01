@@ -119,7 +119,7 @@ async function run() {
 
         app.get('/allOrders', async (req, res) => {
             const query = {};
-            const cursor = OrderCollection.find(query)
+            const cursor = OrderCollection.find(query).sort({ date: -1 })
             const result = await cursor.toArray();
             res.send(result)
         })
@@ -259,6 +259,19 @@ async function run() {
             const updatedDoc = {
                 $set: {
                     process: 'yes'
+                }
+            }
+            const result = await OrderCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+        app.put('/updateDelevered/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = {
+                _id: new ObjectId(id)
+            };
+            const updatedDoc = {
+                $set: {
+                    delivered: 'yes'
                 }
             }
             const result = await OrderCollection.updateOne(filter, updatedDoc);
