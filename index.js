@@ -320,7 +320,7 @@ async function run() {
         app.delete('/reviewDelete/:id', async (req, res) => {
             const id = req.params.id;
             const query = {
-                //objectid not use because database has not it
+
                 _id: new ObjectId(id)
             };
             const result = await ReviewCollection.deleteOne(query);
@@ -329,7 +329,17 @@ async function run() {
         app.delete('/OrderDelete/:id', async (req, res) => {
             const id = req.params.id;
             const query = {
-                //objectid not use because database has not it
+
+                _id: new ObjectId(id)
+            };
+            const result = await OrderCollection.deleteOne(query);
+            res.send(result)
+        })
+
+        app.delete('/deleteOrderfromProfile/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {
+
                 _id: new ObjectId(id)
             };
             const result = await OrderCollection.deleteOne(query);
