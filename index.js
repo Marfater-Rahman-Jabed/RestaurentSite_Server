@@ -132,6 +132,14 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/allorders/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email };
+            const cursor = OrderCollection.find(query).sort({ date: -1 });
+            const result = await cursor.toArray();
+            res.send(result)
+        })
+
         //post method start here
 
 
