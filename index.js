@@ -4,9 +4,16 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const app = express()
 const port = process.env.PORT || 5000
-// 
+
+
+const SSLCommerzPayment = require('sslcommerz-lts')
+const store_id = process.env.STORE_ID;
+const store_passwd = process.env.STORE_PASSWORD;
+const is_live = false
+console.log(store_id, store_passwd)
 app.use(cors())
 app.use(express.json());
+
 
 
 
@@ -136,7 +143,9 @@ async function run() {
             const email = req.params.email;
             const query = { email };
             const cursor = OrderCollection.find(query).sort({ date: -1 });
+            // console.log(cursor)
             const result = await cursor.toArray();
+            // console.log(result[0].paymentData.toArray())
             res.send(result)
         })
 
@@ -196,6 +205,70 @@ async function run() {
             const body = req.body;
             const result = await OrderCollection.insertOne(body)
             res.send(result)
+        })
+
+        app.post('/onlinePayment', async (req, res) => {
+            const paymentData = req.body;
+            // OrderCollection.insertOne(OrderDataBooked)
+            const transectionId = new ObjectId().toString();
+            const data = {
+                total_amount: paymentData.OvarAllPrice,
+                currency: paymentData.currency,
+                tran_id: transectionId, // use unique tran_id for each api call
+                success_url: `http://localhost:5000/paymentSuccess?transectionId=${transectionId}`,
+                fail_url: 'http://localhost:5173/',
+                cancel_url: 'http://localhost:5173/',
+                ipn_url: 'http://localhost:5173/',
+                shipping_method: 'Courier',
+                product_name: paymentData.productName,
+                product_category: 'Electronic',
+                product_profile: 'general',
+                cus_name: paymentData.name,
+                cus_email: paymentData.email,
+                cus_add1: paymentData.address,
+                cus_add2: 'Dhaka',
+                cus_city: 'Dhaka',
+                cus_state: 'Dhaka',
+                cus_postcode: '1000',
+                cus_country: 'Bangladesh',
+                cus_phone: paymentData.phone,
+                cus_fax: '01711111111',
+                ship_name: 'Customer Name',
+                ship_add1: 'Dhaka',
+                ship_add2: 'Dhaka',
+                ship_city: 'Dhaka',
+                ship_state: 'Dhaka',
+                ship_postcode: 1000,
+                ship_country: 'Bangladesh',
+            };
+            const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
+            sslcz.init(data).then(apiResponse => {
+                // Redirect the user to payment gateway
+                let GatewayPageURL = apiResponse.GatewayPageURL
+                res.send({ url: GatewayPageURL })
+                console.log('Redirecting to: ', GatewayPageURL)
+            });
+            const OrderDataBooked = { ...paymentData, transectionId };
+            OrderCollection.insertOne(OrderDataBooked)
+
+        })
+
+        app.post('/paymentSuccess', async (req, res) => {
+            const { transectionId } = req.query;
+            // console.log(req)
+            const filter = {
+                transectionId: transectionId
+            }
+            const updatedDoc = {
+                $set: {
+                    payment: true
+                }
+            }
+            const result = await OrderCollection.updateOne(filter, updatedDoc);
+            if (result.modifiedCount > 0) {
+                res.redirect(`http://localhost:5173/paymentSuccess?transectionId=${transectionId}`)
+            }
+
         })
 
 
