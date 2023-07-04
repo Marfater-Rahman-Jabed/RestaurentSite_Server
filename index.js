@@ -215,10 +215,10 @@ async function run() {
                 total_amount: paymentData.OvarAllPrice,
                 currency: paymentData.currency,
                 tran_id: transectionId, // use unique tran_id for each api call
-                success_url: `http://localhost:5000/paymentSuccess?transectionId=${transectionId}`,
-                fail_url: 'http://localhost:5173/',
-                cancel_url: 'http://localhost:5173/',
-                ipn_url: 'http://localhost:5173/',
+                success_url: `https://resturent-manager-server.vercel.app/paymentSuccess?transectionId=${transectionId}`,
+                fail_url: `https://resturent-manager-server.vercel.app/paymentFail?transectionId=${transectionId}`,
+                cancel_url: `https://resturent-manager-server.vercel.app/paymentCancel?transectionId=${transectionId}`,
+                ipn_url: 'https://resturent-manager-server.vercel.app',
                 shipping_method: 'Courier',
                 product_name: paymentData.productName,
                 product_category: 'Electronic',
@@ -261,13 +261,28 @@ async function run() {
             }
             const updatedDoc = {
                 $set: {
-                    payment: true
+                    payment: true,
+                    fraud: 'no'
                 }
             }
             const result = await OrderCollection.updateOne(filter, updatedDoc);
             if (result.modifiedCount > 0) {
-                res.redirect(`http://localhost:5173/paymentSuccess?transectionId=${transectionId}`)
+                res.redirect(`https://hungrycafe.web.app/paymentSuccess?transectionId=${transectionId}`)
             }
+
+        })
+        app.post('/paymentFail', async (req, res) => {
+            const { transectionId } = req.query;
+
+            res.redirect(`https://hungrycafe.web.app/paymentFail?transectionId=${transectionId}`)
+
+
+        })
+        app.post('/paymentCancel', async (req, res) => {
+            const { transectionId } = req.query;
+
+            res.redirect(`https://hungrycafe.web.app/paymentCancel?transectionId=${transectionId}`)
+
 
         })
 
